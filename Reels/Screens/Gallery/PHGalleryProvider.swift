@@ -63,8 +63,14 @@ class PHGalleryProvider: GalleryProvider {
         manager.cancelImageRequest(id)
     }
 
-    func getAVAsset(for id: VideoID) async -> AVAsset? {
-        return nil
+    func getAVAssetForItem(at index: Int) async -> AVAsset? {
+        let id = videos[index]
+        guard let asset = assets[id] else { return nil }
+        return await withCheckedContinuation { continuation in
+            manager.requestAVAsset(forVideo: asset, options: nil) { avasset, _, _ in
+                continuation.resume(returning: avasset)
+            }
+        }
     }
     
     func setGalleryUpdateCallback(_ callback: @escaping @MainActor () -> ()) {

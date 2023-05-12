@@ -13,7 +13,7 @@ class GalleryViewController: UIViewController {
     private let itemsPerRow = 3
     private var imageLoadingRequests = [IndexPath: Int32]()
     private lazy var thumbnailSize = {
-        let itemWidth = view.bounds.width / 3
+        let itemWidth = view.bounds.width / CGFloat(itemsPerRow)
         return CGSize(width: itemWidth, height: itemWidth * 16 / 9)
     }()
     
@@ -73,6 +73,15 @@ extension GalleryViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return .zero
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        Task {
+            guard let asset = await galleryProvider.getAVAssetForItem(at: indexPath.item) else { return }
+            await MainActor.run {
+                navigationController?.pushViewController(PlaybackViewController(composer: MediaComposer(asset)), animated: true)
+            }
+        }
     }
 }
 

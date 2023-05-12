@@ -16,6 +16,6 @@ protocol GalleryProvider<VideoID> {
 
     func getImageForItem(at index: Int, targetSize: CGSize, onImage: @escaping (UIImage?) -> ()) -> Int32?
     func cancelRequest(_ id: Int32)
-    func getAVAsset(for id: VideoID) async -> AVAsset?
+    func getAVAssetForItem(at index: Int) async -> AVAsset?
     func setGalleryUpdateCallback(_ callback: @escaping @MainActor () -> ())
 }
