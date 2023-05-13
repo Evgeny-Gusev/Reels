@@ -10,15 +10,18 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    var coordinator: Coordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.windowScene = windowScene
-        let navigationController = UINavigationController(rootViewController: GalleryViewController(PHGalleryProvider()))
+        let navigationController = UINavigationController()
         navigationController.setNavigationBarHidden(true, animated: false)
+        coordinator = Coordinator(navigationController: navigationController)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
+        coordinator?.start()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

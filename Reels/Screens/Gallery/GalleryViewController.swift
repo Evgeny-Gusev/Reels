@@ -12,6 +12,7 @@ class GalleryViewController: UIViewController {
     private let galleryProvider: any GalleryProvider
     private let itemsPerRow = 3
     private var imageLoadingRequests = [IndexPath: Int32]()
+    private let onSelection: @MainActor ([AVAsset]) -> ()
     private lazy var thumbnailSize = {
         let itemWidth = view.bounds.width / CGFloat(itemsPerRow)
         return CGSize(width: itemWidth, height: itemWidth * 16 / 9)
@@ -27,8 +28,9 @@ class GalleryViewController: UIViewController {
         return collectionView
     }()
     
-    init(_ galleryProvider: any GalleryProvider) {
+    init(_ galleryProvider: any GalleryProvider, _ onSelection: @MainActor @escaping ([AVAsset]) -> ()) {
         self.galleryProvider = galleryProvider
+        self.onSelection = onSelection
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -78,9 +80,7 @@ extension GalleryViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         Task {
             guard let asset = await galleryProvider.getAVAssetForItem(at: indexPath.item) else { return }
-            await MainActor.run {
-                navigationController?.pushViewController(PlaybackViewController(composer: MediaComposer(asset)), animated: true)
-            }
+            onSelection([asset])
         }
     }
 }

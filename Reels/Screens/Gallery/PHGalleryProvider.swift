@@ -33,6 +33,7 @@ class PHGalleryProvider: GalleryProvider {
                 self.assets[asset.localIdentifier] = asset
                 self.videos.append(asset.localIdentifier)
             }
+            self.videos = videos.reversed()
             
             await onGalleryUpdate?()
         }

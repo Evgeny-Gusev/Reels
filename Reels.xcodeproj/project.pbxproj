@@ -16,6 +16,7 @@
 		4466915C2A0E445600B34E0E /* CMTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466915B2A0E445600B34E0E /* CMTime.swift */; };
 		4466915E2A0E450800B34E0E /* UIEdgeInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466915D2A0E450800B34E0E /* UIEdgeInsets.swift */; };
 		446691602A0E451B00B34E0E /* ViewWithTouchSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466915F2A0E451B00B34E0E /* ViewWithTouchSize.swift */; };
+		446691622A0E4CF800B34E0E /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691612A0E4CF800B34E0E /* Coordinator.swift */; };
 		44A66B282A0CA12D0034FB63 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A66B272A0CA12D0034FB63 /* AppDelegate.swift */; };
 		44A66B2A2A0CA12D0034FB63 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A66B292A0CA12D0034FB63 /* SceneDelegate.swift */; };
 		44A66B2C2A0CA12D0034FB63 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A66B2B2A0CA12D0034FB63 /* GalleryViewController.swift */; };
@@ -61,6 +62,7 @@
 		4466915B2A0E445600B34E0E /* CMTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMTime.swift; sourceTree = "<group>"; };
 		4466915D2A0E450800B34E0E /* UIEdgeInsets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIEdgeInsets.swift; sourceTree = "<group>"; };
 		4466915F2A0E451B00B34E0E /* ViewWithTouchSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewWithTouchSize.swift; sourceTree = "<group>"; };
+		446691612A0E4CF800B34E0E /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		44A66B242A0CA12D0034FB63 /* Reels.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reels.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A66B272A0CA12D0034FB63 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44A66B292A0CA12D0034FB63 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				44A66B5A2A0CDFF40034FB63 /* Cache */,
 				44A66B272A0CA12D0034FB63 /* AppDelegate.swift */,
 				44A66B292A0CA12D0034FB63 /* SceneDelegate.swift */,
+				446691612A0E4CF800B34E0E /* Coordinator.swift */,
 				44A66B332A0CA12E0034FB63 /* Assets.xcassets */,
 				44A66B352A0CA12E0034FB63 /* LaunchScreen.storyboard */,
 				44A66B382A0CA12E0034FB63 /* Info.plist */,
@@ -373,6 +376,7 @@
 				44A66B5C2A0CE0030034FB63 /* CacheService.swift in Sources */,
 				4466915E2A0E450800B34E0E /* UIEdgeInsets.swift in Sources */,
 				446691602A0E451B00B34E0E /* ViewWithTouchSize.swift in Sources */,
+				446691622A0E4CF800B34E0E /* Coordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

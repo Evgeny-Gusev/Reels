@@ -46,7 +46,7 @@ class PlaybackToggleView: UIView {
         return state == .paused ? pausedImage : playingImage
     }
     
-    init(size: CGFloat, player: AVPlayer) {
+    init(size: CGFloat) {
         self.imageView = UIImageView()
         super.init(frame: CGRect(x: 0, y: 0, width: size, height: size))
         
@@ -65,7 +65,10 @@ class PlaybackToggleView: UIView {
             imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
-        
+    }
+    
+    func setPlayer(_ player: AVPlayer) {
+        playerStatusCancellable?.cancel()
         playerStatusCancellable = player.publisher(for: \.timeControlStatus).sink(receiveValue: { [weak self] playerStatus in
             guard let self,
                   self.state.rawValue != playerStatus.rawValue,

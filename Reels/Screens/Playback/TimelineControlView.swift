@@ -34,7 +34,7 @@ class TimelineControlView: UIView {
     private var heightConstraint: NSLayoutConstraint!
     private var playerDurationCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
-    private var player: AVPlayer
+    private var player: AVPlayer?
     private var timeObserverToken: Any?
     private let timelineHeight: CGFloat = 4
     private let expandedHeight: CGFloat = 30
@@ -87,17 +87,25 @@ class TimelineControlView: UIView {
         return indicatorView
     }()
     
-    init(player: AVPlayer) {
-        self.player = player
+    init() {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         setupSubviews()
+        addObserver(self, forKeyPath: timelineBacgroundBoundsKeyPath, options: .new, context: nil)
+    }
+    
+    func setPlayer(_ player: AVPlayer) {
+        playerStatusCancellable?.cancel()
+        playerDurationCancellable?.cancel()
+        self.player = player
+        duration = nil
+        
         Task {
             guard let duration = try? await player.currentItem?.asset.load(.duration) else { return }
             self.duration = duration
             self.playerDurationCancellable = player.publisher(for: \.currentItem?.duration).sink(receiveValue: { [weak self] duration in
                 self?.duration = duration
-                self?.addPeriodicTimeObserver()
+                self?.addPeriodicTimeObserver(for: player)
             })
         }
         playerStatusCancellable = player.publisher(for: \.timeControlStatus).sink(receiveValue: { [weak self] playerStatus in
@@ -111,7 +119,6 @@ class TimelineControlView: UIView {
                 break
             }
         })
-        addObserver(self, forKeyPath: timelineBacgroundBoundsKeyPath, options: .new, context: nil)
     }
     
     private func setupSubviews() {
@@ -144,13 +151,13 @@ class TimelineControlView: UIView {
     }
     
     @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-        guard let duration else { return }
+        guard let duration, let player else { return }
         let locationX = gesture.location(in: timelineBackgroundView).x
         let relativePosition: Double = max(0, min(1, locationX / timelineBackgroundView.bounds.width))
         player.seek(to: duration * relativePosition, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
-    private func addPeriodicTimeObserver() {
+    private func addPeriodicTimeObserver(for player: AVPlayer) {
         let fps = 60.0
         let time = CMTime(seconds: 1.0 / fps, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
 
@@ -160,7 +167,10 @@ class TimelineControlView: UIView {
     }
 
     private func updateTimeline() {
-        guard let duration, duration.seconds > 0, let time else { return }
+        guard let duration, duration.seconds > 0, let time else {
+            timelineWidthConstraint.constant = 0
+            return
+        }
         let progress = time.seconds / duration.seconds
         timelineWidthConstraint.constant = timelineBackgroundView.bounds.width * progress
     }
