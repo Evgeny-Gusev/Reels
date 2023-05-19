@@ -17,7 +17,7 @@ class Coordinator {
     
     func start() {
         navigationController.pushViewController(GalleryViewController(PHGalleryProvider()) { assets in
-            self.navigationController.pushViewController(PlaybackViewController(initialAssets: assets, coordinator: self), animated: true)
+            self.navigationController.pushViewController(TimelineViewController(MediaComposer(assets), coordinator: self), animated: true)
         }, animated: false)
     }
 }

@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4466914F2A0DC53500B34E0E /* PlaybackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466914E2A0DC53500B34E0E /* PlaybackViewController.swift */; };
+		445953C12A1635E10033F6C4 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445953C02A1635E10033F6C4 /* UIImage.swift */; };
+		4466914F2A0DC53500B34E0E /* PlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466914E2A0DC53500B34E0E /* PlaybackView.swift */; };
 		446691512A0E23D000B34E0E /* PlaybackToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691502A0E23D000B34E0E /* PlaybackToggleView.swift */; };
-		446691532A0E242400B34E0E /* TimelineControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691522A0E242400B34E0E /* TimelineControlView.swift */; };
+		446691532A0E242400B34E0E /* PlayProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691522A0E242400B34E0E /* PlayProgressBarView.swift */; };
 		446691562A0E245900B34E0E /* UIButtonConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691552A0E245900B34E0E /* UIButtonConfiguration.swift */; };
 		446691582A0E246D00B34E0E /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691572A0E246D00B34E0E /* UIColor.swift */; };
 		4466915A2A0E24B300B34E0E /* MediaComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691592A0E24B300B34E0E /* MediaComposer.swift */; };
@@ -17,6 +18,13 @@
 		4466915E2A0E450800B34E0E /* UIEdgeInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466915D2A0E450800B34E0E /* UIEdgeInsets.swift */; };
 		446691602A0E451B00B34E0E /* ViewWithTouchSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466915F2A0E451B00B34E0E /* ViewWithTouchSize.swift */; };
 		446691622A0E4CF800B34E0E /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691612A0E4CF800B34E0E /* Coordinator.swift */; };
+		4472EAEB2A1235FD00851E12 /* TimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAEA2A1235FD00851E12 /* TimelineViewController.swift */; };
+		4472EAEE2A1244D500851E12 /* TopToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAED2A1244D500851E12 /* TopToolBar.swift */; };
+		4472EAF02A1251FF00851E12 /* TimelineCollectionViewLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAEF2A1251FF00851E12 /* TimelineCollectionViewLayout.swift */; };
+		4472EAF22A137BDC00851E12 /* TimeScaleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAF12A137BDC00851E12 /* TimeScaleView.swift */; };
+		4472EAF52A15FE8C00851E12 /* PlaybackBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAF42A15FE8C00851E12 /* PlaybackBottomBarView.swift */; };
+		4472EAF72A1607ED00851E12 /* TimelineBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAF62A1607ED00851E12 /* TimelineBottomBarView.swift */; };
+		4472EAF92A160DF300851E12 /* MiddleToolBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472EAF82A160DF300851E12 /* MiddleToolBarView.swift */; };
 		44A66B282A0CA12D0034FB63 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A66B272A0CA12D0034FB63 /* AppDelegate.swift */; };
 		44A66B2A2A0CA12D0034FB63 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A66B292A0CA12D0034FB63 /* SceneDelegate.swift */; };
 		44A66B2C2A0CA12D0034FB63 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A66B2B2A0CA12D0034FB63 /* GalleryViewController.swift */; };
@@ -53,9 +61,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4466914E2A0DC53500B34E0E /* PlaybackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackViewController.swift; sourceTree = "<group>"; };
+		445953C02A1635E10033F6C4 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		4466914E2A0DC53500B34E0E /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		446691502A0E23D000B34E0E /* PlaybackToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackToggleView.swift; sourceTree = "<group>"; };
-		446691522A0E242400B34E0E /* TimelineControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineControlView.swift; sourceTree = "<group>"; };
+		446691522A0E242400B34E0E /* PlayProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayProgressBarView.swift; sourceTree = "<group>"; };
 		446691552A0E245900B34E0E /* UIButtonConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButtonConfiguration.swift; sourceTree = "<group>"; };
 		446691572A0E246D00B34E0E /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		446691592A0E24B300B34E0E /* MediaComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaComposer.swift; sourceTree = "<group>"; };
@@ -63,6 +72,13 @@
 		4466915D2A0E450800B34E0E /* UIEdgeInsets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIEdgeInsets.swift; sourceTree = "<group>"; };
 		4466915F2A0E451B00B34E0E /* ViewWithTouchSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewWithTouchSize.swift; sourceTree = "<group>"; };
 		446691612A0E4CF800B34E0E /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
+		4472EAEA2A1235FD00851E12 /* TimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineViewController.swift; sourceTree = "<group>"; };
+		4472EAED2A1244D500851E12 /* TopToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopToolBar.swift; sourceTree = "<group>"; };
+		4472EAEF2A1251FF00851E12 /* TimelineCollectionViewLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineCollectionViewLayout.swift; sourceTree = "<group>"; };
+		4472EAF12A137BDC00851E12 /* TimeScaleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeScaleView.swift; sourceTree = "<group>"; };
+		4472EAF42A15FE8C00851E12 /* PlaybackBottomBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackBottomBarView.swift; sourceTree = "<group>"; };
+		4472EAF62A1607ED00851E12 /* TimelineBottomBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineBottomBarView.swift; sourceTree = "<group>"; };
+		4472EAF82A160DF300851E12 /* MiddleToolBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiddleToolBarView.swift; sourceTree = "<group>"; };
 		44A66B242A0CA12D0034FB63 /* Reels.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reels.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44A66B272A0CA12D0034FB63 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44A66B292A0CA12D0034FB63 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -113,9 +129,10 @@
 		4466914D2A0DC51000B34E0E /* Playback */ = {
 			isa = PBXGroup;
 			children = (
-				4466914E2A0DC53500B34E0E /* PlaybackViewController.swift */,
+				4472EAEC2A1244AE00851E12 /* TopToolBar */,
+				4466914E2A0DC53500B34E0E /* PlaybackView.swift */,
 				446691502A0E23D000B34E0E /* PlaybackToggleView.swift */,
-				446691522A0E242400B34E0E /* TimelineControlView.swift */,
+				446691522A0E242400B34E0E /* PlayProgressBarView.swift */,
 			);
 			path = Playback;
 			sourceTree = "<group>";
@@ -127,8 +144,38 @@
 				446691572A0E246D00B34E0E /* UIColor.swift */,
 				4466915B2A0E445600B34E0E /* CMTime.swift */,
 				4466915D2A0E450800B34E0E /* UIEdgeInsets.swift */,
+				445953C02A1635E10033F6C4 /* UIImage.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		4472EAE92A1235DF00851E12 /* Timeline */ = {
+			isa = PBXGroup;
+			children = (
+				4472EAF32A15FDD200851E12 /* BottomBar */,
+				4472EAEA2A1235FD00851E12 /* TimelineViewController.swift */,
+				4472EAEF2A1251FF00851E12 /* TimelineCollectionViewLayout.swift */,
+				4472EAF12A137BDC00851E12 /* TimeScaleView.swift */,
+				4472EAF82A160DF300851E12 /* MiddleToolBarView.swift */,
+			);
+			path = Timeline;
+			sourceTree = "<group>";
+		};
+		4472EAEC2A1244AE00851E12 /* TopToolBar */ = {
+			isa = PBXGroup;
+			children = (
+				4472EAED2A1244D500851E12 /* TopToolBar.swift */,
+			);
+			path = TopToolBar;
+			sourceTree = "<group>";
+		};
+		4472EAF32A15FDD200851E12 /* BottomBar */ = {
+			isa = PBXGroup;
+			children = (
+				4472EAF42A15FE8C00851E12 /* PlaybackBottomBarView.swift */,
+				4472EAF62A1607ED00851E12 /* TimelineBottomBarView.swift */,
+			);
+			path = BottomBar;
 			sourceTree = "<group>";
 		};
 		44A66B1B2A0CA12D0034FB63 = {
@@ -197,6 +244,7 @@
 		44A66B5F2A0CE02A0034FB63 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				4472EAE92A1235DF00851E12 /* Timeline */,
 				4466914D2A0DC51000B34E0E /* Playback */,
 				44A66B602A0CE0360034FB63 /* Gallery */,
 			);
@@ -356,26 +404,34 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4472EAF72A1607ED00851E12 /* TimelineBottomBarView.swift in Sources */,
 				446691512A0E23D000B34E0E /* PlaybackToggleView.swift in Sources */,
+				4472EAEE2A1244D500851E12 /* TopToolBar.swift in Sources */,
+				4472EAEB2A1235FD00851E12 /* TimelineViewController.swift in Sources */,
 				4466915A2A0E24B300B34E0E /* MediaComposer.swift in Sources */,
 				44A66B2C2A0CA12D0034FB63 /* GalleryViewController.swift in Sources */,
+				4472EAF02A1251FF00851E12 /* TimelineCollectionViewLayout.swift in Sources */,
 				44A66B632A0CE0610034FB63 /* PHGalleryProvider.swift in Sources */,
 				44A66B322A0CA12D0034FB63 /* Reels.xcdatamodeld in Sources */,
 				44A66B6C2A0CE0F50034FB63 /* GalleryThumbnailCollectionViewCell.swift in Sources */,
 				446691582A0E246D00B34E0E /* UIColor.swift in Sources */,
-				446691532A0E242400B34E0E /* TimelineControlView.swift in Sources */,
+				446691532A0E242400B34E0E /* PlayProgressBarView.swift in Sources */,
 				44A66B652A0CE07E0034FB63 /* GalleryProvider.swift in Sources */,
 				446691562A0E245900B34E0E /* UIButtonConfiguration.swift in Sources */,
 				44A66B282A0CA12D0034FB63 /* AppDelegate.swift in Sources */,
+				4472EAF92A160DF300851E12 /* MiddleToolBarView.swift in Sources */,
 				44A66B5E2A0CE0120034FB63 /* MemoryCache.swift in Sources */,
 				44A66B2A2A0CA12D0034FB63 /* SceneDelegate.swift in Sources */,
 				44A66B682A0CE0C80034FB63 /* ReusableItem.swift in Sources */,
-				4466914F2A0DC53500B34E0E /* PlaybackViewController.swift in Sources */,
+				445953C12A1635E10033F6C4 /* UIImage.swift in Sources */,
+				4466914F2A0DC53500B34E0E /* PlaybackView.swift in Sources */,
+				4472EAF52A15FE8C00851E12 /* PlaybackBottomBarView.swift in Sources */,
 				44A66B6A2A0CE0DE0034FB63 /* UseAutoLayout.swift in Sources */,
 				4466915C2A0E445600B34E0E /* CMTime.swift in Sources */,
 				44A66B5C2A0CE0030034FB63 /* CacheService.swift in Sources */,
 				4466915E2A0E450800B34E0E /* UIEdgeInsets.swift in Sources */,
 				446691602A0E451B00B34E0E /* ViewWithTouchSize.swift in Sources */,
+				4472EAF22A137BDC00851E12 /* TimeScaleView.swift in Sources */,
 				446691622A0E4CF800B34E0E /* Coordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

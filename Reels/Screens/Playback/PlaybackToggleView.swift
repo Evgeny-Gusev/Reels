@@ -41,12 +41,13 @@ class PlaybackToggleView: UIView {
     private let playingImage = UIImage(systemName: "play.fill")
     private let pausedImage = UIImage(systemName: "pause.fill")
     private let imageView: UIImageView
+    private var playerCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
     private var currentImage: UIImage? {
         return state == .paused ? pausedImage : playingImage
     }
     
-    init(size: CGFloat) {
+    init(size: CGFloat, mediaComposer: MediaComposer) {
         self.imageView = UIImageView()
         super.init(frame: CGRect(x: 0, y: 0, width: size, height: size))
         
@@ -65,17 +66,27 @@ class PlaybackToggleView: UIView {
             imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
+        
+        playerCancellable = mediaComposer
+            .$player
+            .sink { [weak self] newPlayer in
+                guard let newPlayer else { return }
+                self?.setPlayer(newPlayer)
+            }
     }
     
-    func setPlayer(_ player: AVPlayer) {
+    private func setPlayer(_ player: AVPlayer) {
         playerStatusCancellable?.cancel()
-        playerStatusCancellable = player.publisher(for: \.timeControlStatus).sink(receiveValue: { [weak self] playerStatus in
-            guard let self,
-                  self.state.rawValue != playerStatus.rawValue,
-                  playerStatus != .waitingToPlayAtSpecifiedRate,
-                  let newState = State(rawValue: playerStatus.rawValue) else { return }
-            self.state = newState
-        })
+        playerStatusCancellable = player
+            .publisher(for: \.timeControlStatus)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] playerStatus in
+                guard let self,
+                      self.state.rawValue != playerStatus.rawValue,
+                      playerStatus != .waitingToPlayAtSpecifiedRate,
+                      let newState = State(rawValue: playerStatus.rawValue) else { return }
+                self.state = newState
+            })
     }
     
     required init?(coder: NSCoder) {

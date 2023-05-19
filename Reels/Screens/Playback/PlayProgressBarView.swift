@@ -1,5 +1,5 @@
 //
-//  TimelineControlView.swift
+//  PlayProgressBarView.swift
 //  Reels
 //
 //  Created by Eugene on 12/5/2023.
@@ -9,17 +9,17 @@ import UIKit
 import AVFoundation
 import Combine
 
-class TimelineControlView: UIView {
+class PlayProgressBarView: UIView {
     private enum State {
         case expanded, collapsed
     }
     
     private var duration: CMTime? {
-        didSet { updateTimeline() }
+        didSet { updateProgressBar() }
     }
     private var time: CMTime? {
         didSet {
-            updateTimeline()
+            updateProgressBar()
             updateTime()
         }
     }
@@ -34,12 +34,13 @@ class TimelineControlView: UIView {
     private var heightConstraint: NSLayoutConstraint!
     private var playerDurationCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
+    private var playerCancellable: AnyCancellable?
     private var player: AVPlayer?
     private var timeObserverToken: Any?
     private let timelineHeight: CGFloat = 4
     private let expandedHeight: CGFloat = 30
     private let indicatorViewSize: CGFloat = 8
-    private let timelineBacgroundBoundsKeyPath = NSExpression(forKeyPath: \TimelineControlView.timelineBackgroundView.bounds).keyPath
+    private let timelineBackgroundBoundsKeyPath = NSExpression(forKeyPath: \PlayProgressBarView.timelineBackgroundView.bounds).keyPath
     
     @objc private lazy var timelineBackgroundView: UIView = {
         let timelineBackgroundView = UIView()
@@ -87,14 +88,20 @@ class TimelineControlView: UIView {
         return indicatorView
     }()
     
-    init() {
+    init(mediaComposer: MediaComposer) {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         setupSubviews()
-        addObserver(self, forKeyPath: timelineBacgroundBoundsKeyPath, options: .new, context: nil)
+        addObserver(self, forKeyPath: timelineBackgroundBoundsKeyPath, options: .new, context: nil)
+        playerCancellable = mediaComposer
+            .$player
+            .sink { [weak self] newPlayer in
+                guard let newPlayer else { return }
+                self?.setPlayer(newPlayer)
+            }
     }
     
-    func setPlayer(_ player: AVPlayer) {
+    private func setPlayer(_ player: AVPlayer) {
         playerStatusCancellable?.cancel()
         playerDurationCancellable?.cancel()
         self.player = player
@@ -103,22 +110,27 @@ class TimelineControlView: UIView {
         Task {
             guard let duration = try? await player.currentItem?.asset.load(.duration) else { return }
             self.duration = duration
-            self.playerDurationCancellable = player.publisher(for: \.currentItem?.duration).sink(receiveValue: { [weak self] duration in
-                self?.duration = duration
-                self?.addPeriodicTimeObserver(for: player)
-            })
+            self.playerDurationCancellable = player.publisher(for: \.currentItem?.duration)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveValue: { [weak self] duration in
+                    self?.duration = duration
+                    self?.addPeriodicTimeObserver(for: player)
+                })
         }
-        playerStatusCancellable = player.publisher(for: \.timeControlStatus).sink(receiveValue: { [weak self] playerStatus in
-            guard let self else { return }
-            switch playerStatus {
-            case .playing:
-                self.state = .collapsed
-            case .paused:
-                self.state = .expanded
-            default:
-                break
-            }
-        })
+        playerStatusCancellable = player
+            .publisher(for: \.timeControlStatus)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] playerStatus in
+                guard let self else { return }
+                switch playerStatus {
+                case .playing:
+                    self.state = .collapsed
+                case .paused:
+                    self.state = .expanded
+                default:
+                    break
+                }
+            })
     }
     
     private func setupSubviews() {
@@ -145,8 +157,8 @@ class TimelineControlView: UIView {
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == timelineBacgroundBoundsKeyPath {
-            updateTimeline()
+        if keyPath == timelineBackgroundBoundsKeyPath {
+            updateProgressBar()
         }
     }
     
@@ -166,7 +178,7 @@ class TimelineControlView: UIView {
         }
     }
 
-    private func updateTimeline() {
+    private func updateProgressBar() {
         guard let duration, duration.seconds > 0, let time else {
             timelineWidthConstraint.constant = 0
             return

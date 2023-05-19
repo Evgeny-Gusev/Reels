@@ -9,12 +9,15 @@ import AVFoundation
 import UIKit
 
 class MediaComposer {
-    typealias NewPlayerItemCallback = @MainActor (AVPlayerItem, CMTime) -> ()
-    private var onPlayerItem: NewPlayerItemCallback?
     private var assets = [AVAsset]()
+    private var looper: AVPlayerLooper?
+    
+    @Published private(set) var timeline = Timeline(totalDuration: .zero, videos: [])
+    @Published private(set) var player: AVPlayer? = nil
     
     init(_ initialAssets: [AVAsset]) {
-        self.assets = initialAssets
+        self.assets = []
+        addAssets(initialAssets)
     }
     
     func addAsset(_ newAsset: AVAsset) {
@@ -23,23 +26,13 @@ class MediaComposer {
     
     func addAssets(_ newAssets: [AVAsset]) {
         assets.append(contentsOf: newAssets)
-        if let callback = onPlayerItem {
-            Task {
-                let t = await createPlayerItem()
-                await callback(t.0, t.1)
-            }
-        }
-    }
-    
-    func setOnPlayerItem(_ callback: @escaping NewPlayerItemCallback) {
-        onPlayerItem = callback
         Task {
-            let t = await createPlayerItem()
-            await callback(t.0, t.1)
+            await createPlayerItem()
         }
     }
     
-    private func createPlayerItem() async -> (AVPlayerItem, CMTime) {
+    private func createPlayerItem() async {
+        var timelineVideoTracks = [TimelineTrack]()
         let composition = AVMutableComposition()
         var videoTracks = [AVAssetTrack]()
         var audioTracks = [AVAssetTrack]()
@@ -56,17 +49,24 @@ class MediaComposer {
         var insertionTime: CMTime = .zero
         var instructions = [AVMutableVideoCompositionLayerInstruction]()
         for i in videoTracks.indices {
-            let addedVideoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
-            let addedAudioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
+            let addedVideoTrack = composition.addMutableTrack(withMediaType: .video,
+                                                              preferredTrackID: kCMPersistentTrackID_Invalid)
+            let addedAudioTrack = composition.addMutableTrack(withMediaType: .audio,
+                                                              preferredTrackID: kCMPersistentTrackID_Invalid)
             do {
-                try addedVideoTrack!.insertTimeRange(ranges[i], of: videoTracks[i], at: insertionTime)
+                try addedVideoTrack!.insertTimeRange(ranges[i],
+                                                     of: videoTracks[i],
+                                                     at: insertionTime)
             } catch {
                 print("Couldn't add asset: \(error.localizedDescription)")
             }
-            try? addedAudioTrack!.insertTimeRange(ranges[i], of: audioTracks[i], at: insertionTime)
+            timelineVideoTracks.append(TimelineTrack(assetTrack: videoTracks[i],
+                                                     duration: ranges[i].duration))
+            try? addedAudioTrack!.insertTimeRange(ranges[i],
+                                                  of: audioTracks[i],
+                                                  at: insertionTime)
             addedVideoTrack?.preferredTransform = transforms[i]
             insertionTime = insertionTime + ranges[i].duration
-            
             let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: addedVideoTrack!)
             layerInstruction.setTransform(transforms[i], at: .zero)
             layerInstruction.setOpacity(0, at: insertionTime)
@@ -81,9 +81,35 @@ class MediaComposer {
         videoComposition.instructions = [mainInstruction]
         videoComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
         videoComposition.renderSize = CGSize(width: 1080, height: 1920)
-
-        let playerItem = AVPlayerItem(asset: composition)
-        playerItem.videoComposition = videoComposition
-        return (playerItem, insertionTime)
+        
+        timeline = Timeline(totalDuration: insertionTime, videos: timelineVideoTracks)
+        let currentPlayRate = self.player?.rate ?? 1
+        self.player?.pause()
+        let currentTime = self.player?.currentTime() ?? .zero
+        let newPlayerItem = AVPlayerItem(asset: composition)
+        newPlayerItem.videoComposition = videoComposition
+        let queuePlayer = AVQueuePlayer()
+        looper = AVPlayerLooper(player: queuePlayer, templateItem: newPlayerItem)
+        self.player = queuePlayer
+        
+        await MainActor.run {
+            self.player?.seek(to: currentTime, toleranceBefore: .zero, toleranceAfter: .zero)
+            self.player?.rate = currentPlayRate
+        }
     }
+    
+    func togglePlayback() {
+        guard let player else { return }
+        player.rate == 0 ? player.play() : player.pause()
+    }
+}
+
+struct Timeline {
+    let totalDuration: CMTime
+    let videos: [TimelineTrack]
+}
+
+struct TimelineTrack {
+    let assetTrack: AVAssetTrack
+    let duration: CMTime
 }
