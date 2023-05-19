@@ -17,7 +17,6 @@ class TimelineViewController: UIViewController {
     }
     
     private let mediaComposer: MediaComposer
-    private var timelineCancellable: AnyCancellable? = nil
     private weak var coordinator: (any PlaybackCoordinator)?
     private var playbackHeightConstraint: NSLayoutConstraint!
     private let bottomBarHeight: CGFloat = 40
@@ -36,11 +35,6 @@ class TimelineViewController: UIViewController {
         let playbackView = PlaybackView(mediaComposer)
         playbackView.delegate = self
         return playbackView
-    }()
-    
-    private lazy var timeScaleView: TimeScaleView = {
-        let timeScaleView = TimeScaleView(mediaComposer)
-        return timeScaleView
     }()
     
     private lazy var bottomBarContainerView: UIView = {
@@ -68,17 +62,10 @@ class TimelineViewController: UIViewController {
         return middleToolBarView
     }()
     
-    private lazy var collectionView: UICollectionView = {
-        let layout = TimelineCollectionViewLayout()
-        layout.delegate = self
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.register(TimelineVideoCollectionViewCell.self)
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        collectionView.alwaysBounceVertical = true
-        collectionView.contentInset = UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100)
-        return collectionView
+    private lazy var timelineCollectionViewController: TimelineCollectionViewController = {
+        let collectionViewController = TimelineCollectionViewController(mediaComposer: mediaComposer)
+        collectionViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        return collectionViewController
     }()
     
     init(_ mediaComposer: MediaComposer, coordinator: any PlaybackCoordinator) {
@@ -92,29 +79,18 @@ class TimelineViewController: UIViewController {
         setupViews()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        timelineCancellable = mediaComposer.$timeline.receive(on: DispatchQueue.main).sink { _ in
-            self.collectionView.reloadData()
-        }
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        timelineCancellable?.cancel()
-    }
-    
     private func setupViews() {
+        addChild(timelineCollectionViewController)
+        view.addSubview(timelineCollectionViewController.view)
+        timelineCollectionViewController.didMove(toParent: self)
+        
         view.addSubview(playbackView)
-        view.addSubview(timeScaleView)
-        view.addSubview(collectionView)
         view.addSubview(middleToolBarView)
         view.addSubview(bottomBarContainerView)
         
         let middleBarHeight: CGFloat = 40
-        let timeScaleHeight: CGFloat = 20
         let totalHeight = availableScreenHeight
-        let collectionViewHeight = totalHeight * (1 - playbackCollapsedMultiplier) - middleBarHeight - timeScaleHeight
+        let collectionViewHeight = totalHeight * (1 - playbackCollapsedMultiplier) - middleBarHeight
         let playbackMultiplier: CGFloat = state == .fullscreenPreview ? 1 : playbackCollapsedMultiplier
         
         playbackHeightConstraint = playbackView.heightAnchor.constraint(equalToConstant: totalHeight * playbackMultiplier)
@@ -132,18 +108,13 @@ class TimelineViewController: UIViewController {
             
             middleToolBarView.topAnchor.constraint(equalTo: playbackView.bottomAnchor),
             middleToolBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            middleToolBarView.bottomAnchor.constraint(equalTo: timeScaleView.topAnchor),
+            middleToolBarView.bottomAnchor.constraint(equalTo: timelineCollectionViewController.view.topAnchor),
             middleToolBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             middleToolBarView.heightAnchor.constraint(equalToConstant: middleBarHeight),
             
-            timeScaleView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            timeScaleView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            timeScaleView.heightAnchor.constraint(equalToConstant: timeScaleHeight),
-            
-            collectionView.topAnchor.constraint(equalTo: timeScaleView.bottomAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.heightAnchor.constraint(equalToConstant: collectionViewHeight)
+            timelineCollectionViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            timelineCollectionViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            timelineCollectionViewController.view.heightAnchor.constraint(equalToConstant: collectionViewHeight)
         ])
         
         updateBottomBar()
@@ -169,38 +140,6 @@ class TimelineViewController: UIViewController {
             bottomBar.bottomAnchor.constraint(equalTo: bottomBarContainerView.bottomAnchor),
             bottomBar.leadingAnchor.constraint(equalTo: bottomBarContainerView.leadingAnchor)
         ])
-    }
-    
-    private func getTimeline(track: TimelineTrack, targetSize: CGSize, scale: CGFloat = 1) async -> UIImage? {
-        guard let asset = track.assetTrack.asset,
-              let (originalNaturalSize, preferredTransform) = try? await track.assetTrack.load(.naturalSize, .preferredTransform) else { return nil }
-        
-        let transformedNaturalSize = originalNaturalSize.applying(preferredTransform)
-        let naturalSize = CGSize(width: abs(transformedNaturalSize.width), height: (transformedNaturalSize.height))
-        let frameWidth = targetSize.height * (naturalSize.width / naturalSize.height)
-        let framesCount = Int((targetSize.width / frameWidth).rounded(.up))
-        
-        let frameGap = track.duration.seconds / Double(framesCount)
-        
-        var times = [CMTime]()
-        for frame in 0..<framesCount {
-            times.append(CMTime(seconds: frameGap * Double(frame), preferredTimescale: 100))
-        }
-        
-        let generator = AVAssetImageGenerator(asset: asset)
-        generator.appliesPreferredTrackTransform = true
-        
-        UIGraphicsBeginImageContextWithOptions(targetSize, false, scale)
-        defer { UIGraphicsEndImageContext() }
-        
-        for await result in generator.images(for: times) {
-            if case let .success(requestedTime, cgImage, _) = result {
-                let index = Int((requestedTime.seconds / frameGap).rounded())
-                let uiImage = UIImage(cgImage: cgImage)
-                uiImage.draw(in: CGRect(x: frameWidth * CGFloat(index), y: 0, width: frameWidth, height: targetSize.height))
-            }
-        }
-        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     private func animateStateChange() {
@@ -252,63 +191,5 @@ extension TimelineViewController: PlaybackViewDelegate {
     
     func closePressed() {
         navigationController?.popViewController(animated: true)
-    }
-}
-
-extension TimelineViewController: TimelineCollectionViewLayoutDelegate {
-    func widthForItem(at indexPath: IndexPath) -> CGFloat {
-        return CGFloat(mediaComposer.timeline.videos[indexPath.item].duration.seconds * 100)
-    }
-}
-
-extension TimelineViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return mediaComposer.timeline.videos.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueCell(at: indexPath, type: TimelineVideoCollectionViewCell.self)
-        if indexPath.row == 0 {
-            cell.imageView.backgroundColor = .blue
-        }
-        Task {
-            let timelineImage = await getTimeline(track: mediaComposer.timeline.videos[indexPath.item],
-                                                  targetSize: CGSize(width: widthForItem(at: indexPath),
-                                                                     height: 60))
-            await MainActor.run {
-                cell.imageView.image = timelineImage
-            }
-        }
-        return cell
-    }
-}
-
-extension TimelineViewController: UICollectionViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        timeScaleView.updateOffset(scrollView.contentOffset.x)
-    }
-}
-
-class TimelineVideoCollectionViewCell: UICollectionViewCell, ReusableItem {
-    @UseAutoLayout var imageView = UIImageView()
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setup()
-    }
-    
-    private func setup() {
-        addSubview(imageView)
-        imageView.backgroundColor = .red
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: topAnchor),
-            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor)
-        ])
     }
 }

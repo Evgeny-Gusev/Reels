@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		445953C12A1635E10033F6C4 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445953C02A1635E10033F6C4 /* UIImage.swift */; };
+		445953C42A17249E0033F6C4 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445953C32A17249E0033F6C4 /* Timeline.swift */; };
+		445953C72A1724F60033F6C4 /* TimelineVideoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445953C62A1724F60033F6C4 /* TimelineVideoCollectionViewCell.swift */; };
+		445953C92A1764040033F6C4 /* TimelineCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445953C82A1764040033F6C4 /* TimelineCollectionViewController.swift */; };
 		4466914F2A0DC53500B34E0E /* PlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4466914E2A0DC53500B34E0E /* PlaybackView.swift */; };
 		446691512A0E23D000B34E0E /* PlaybackToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691502A0E23D000B34E0E /* PlaybackToggleView.swift */; };
 		446691532A0E242400B34E0E /* PlayProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446691522A0E242400B34E0E /* PlayProgressBarView.swift */; };
@@ -62,6 +65,9 @@
 
 /* Begin PBXFileReference section */
 		445953C02A1635E10033F6C4 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		445953C32A17249E0033F6C4 /* Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
+		445953C62A1724F60033F6C4 /* TimelineVideoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineVideoCollectionViewCell.swift; sourceTree = "<group>"; };
+		445953C82A1764040033F6C4 /* TimelineCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineCollectionViewController.swift; sourceTree = "<group>"; };
 		4466914E2A0DC53500B34E0E /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		446691502A0E23D000B34E0E /* PlaybackToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackToggleView.swift; sourceTree = "<group>"; };
 		446691522A0E242400B34E0E /* PlayProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayProgressBarView.swift; sourceTree = "<group>"; };
@@ -126,6 +132,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		445953C22A1724910033F6C4 /* MediaComposer */ = {
+			isa = PBXGroup;
+			children = (
+				446691592A0E24B300B34E0E /* MediaComposer.swift */,
+				445953C32A17249E0033F6C4 /* Timeline.swift */,
+			);
+			path = MediaComposer;
+			sourceTree = "<group>";
+		};
+		445953C52A1724ED0033F6C4 /* CollectionView */ = {
+			isa = PBXGroup;
+			children = (
+				445953C62A1724F60033F6C4 /* TimelineVideoCollectionViewCell.swift */,
+				445953C82A1764040033F6C4 /* TimelineCollectionViewController.swift */,
+			);
+			path = CollectionView;
+			sourceTree = "<group>";
+		};
 		4466914D2A0DC51000B34E0E /* Playback */ = {
 			isa = PBXGroup;
 			children = (
@@ -152,6 +176,8 @@
 		4472EAE92A1235DF00851E12 /* Timeline */ = {
 			isa = PBXGroup;
 			children = (
+				445953C52A1724ED0033F6C4 /* CollectionView */,
+				4466914D2A0DC51000B34E0E /* Playback */,
 				4472EAF32A15FDD200851E12 /* BottomBar */,
 				4472EAEA2A1235FD00851E12 /* TimelineViewController.swift */,
 				4472EAEF2A1251FF00851E12 /* TimelineCollectionViewLayout.swift */,
@@ -245,7 +271,6 @@
 			isa = PBXGroup;
 			children = (
 				4472EAE92A1235DF00851E12 /* Timeline */,
-				4466914D2A0DC51000B34E0E /* Playback */,
 				44A66B602A0CE0360034FB63 /* Gallery */,
 			);
 			path = Screens;
@@ -265,10 +290,10 @@
 		44A66B662A0CE0B40034FB63 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				445953C22A1724910033F6C4 /* MediaComposer */,
 				446691542A0E244700B34E0E /* Extensions */,
 				44A66B672A0CE0C80034FB63 /* ReusableItem.swift */,
 				44A66B692A0CE0DE0034FB63 /* UseAutoLayout.swift */,
-				446691592A0E24B300B34E0E /* MediaComposer.swift */,
 				4466915F2A0E451B00B34E0E /* ViewWithTouchSize.swift */,
 			);
 			path = Utils;
@@ -407,6 +432,7 @@
 				4472EAF72A1607ED00851E12 /* TimelineBottomBarView.swift in Sources */,
 				446691512A0E23D000B34E0E /* PlaybackToggleView.swift in Sources */,
 				4472EAEE2A1244D500851E12 /* TopToolBar.swift in Sources */,
+				445953C92A1764040033F6C4 /* TimelineCollectionViewController.swift in Sources */,
 				4472EAEB2A1235FD00851E12 /* TimelineViewController.swift in Sources */,
 				4466915A2A0E24B300B34E0E /* MediaComposer.swift in Sources */,
 				44A66B2C2A0CA12D0034FB63 /* GalleryViewController.swift in Sources */,
@@ -418,10 +444,12 @@
 				446691532A0E242400B34E0E /* PlayProgressBarView.swift in Sources */,
 				44A66B652A0CE07E0034FB63 /* GalleryProvider.swift in Sources */,
 				446691562A0E245900B34E0E /* UIButtonConfiguration.swift in Sources */,
+				445953C72A1724F60033F6C4 /* TimelineVideoCollectionViewCell.swift in Sources */,
 				44A66B282A0CA12D0034FB63 /* AppDelegate.swift in Sources */,
 				4472EAF92A160DF300851E12 /* MiddleToolBarView.swift in Sources */,
 				44A66B5E2A0CE0120034FB63 /* MemoryCache.swift in Sources */,
 				44A66B2A2A0CA12D0034FB63 /* SceneDelegate.swift in Sources */,
+				445953C42A17249E0033F6C4 /* Timeline.swift in Sources */,
 				44A66B682A0CE0C80034FB63 /* ReusableItem.swift in Sources */,
 				445953C12A1635E10033F6C4 /* UIImage.swift in Sources */,
 				4466914F2A0DC53500B34E0E /* PlaybackView.swift in Sources */,

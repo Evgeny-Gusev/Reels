@@ -103,13 +103,3 @@ class MediaComposer {
         player.rate == 0 ? player.play() : player.pause()
     }
 }
-
-struct Timeline {
-    let totalDuration: CMTime
-    let videos: [TimelineTrack]
-}
-
-struct TimelineTrack {
-    let assetTrack: AVAssetTrack
-    let duration: CMTime
-}
