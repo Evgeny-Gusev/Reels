@@ -95,6 +95,7 @@ class PlayProgressBarView: UIView {
         addObserver(self, forKeyPath: timelineBackgroundBoundsKeyPath, options: .new, context: nil)
         playerCancellable = mediaComposer
             .$player
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] newPlayer in
                 guard let newPlayer else { return }
                 self?.setPlayer(newPlayer)

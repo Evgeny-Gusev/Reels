@@ -11,13 +11,39 @@ import Combine
 
 class TimelineCollectionViewController: UICollectionViewController {
     private var mediaComposer: MediaComposer
-    private var timelineCancellable: AnyCancellable? = nil
+    private var timelineCancellable: AnyCancellable?
+    private var playerCancellable: AnyCancellable?
+    private var playerStatusCancellable: AnyCancellable?
+    private var timeObserverToken: Any?
+    private let timelineImageProvider = TimelineImageProvider()
+    private var isDragging = false {
+        didSet {
+            if isDragging == oldValue { return }
+            if isDragging {
+                mediaComposer.player?.pause()
+                if let timeObserverToken {
+                    mediaComposer.player?.removeTimeObserver(timeObserverToken)
+                    self.timeObserverToken = nil
+                }
+            } else {
+                observePlayTime(mediaComposer.player)
+            }
+        }
+    }
+    private lazy var collectionViewHorizontalInset: CGFloat = view.safeAreaLayoutGuide.layoutFrame.size.width / 2
     
     private lazy var timeScaleView: TimeScaleView = {
         let timeScaleView = TimeScaleView(mediaComposer)
         return timeScaleView
     }()
     
+    private lazy var timeIndicatorView: UIView = {
+       let timeIndicatorView = UIView()
+        timeIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        timeIndicatorView.backgroundColor = .gray
+        return timeIndicatorView
+    }()
+        
     init(mediaComposer: MediaComposer) {
         self.mediaComposer = mediaComposer
         let layout = TimelineCollectionViewLayout()
@@ -26,8 +52,8 @@ class TimelineCollectionViewController: UICollectionViewController {
         collectionView.register(TimelineVideoCollectionViewCell.self)
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.alwaysBounceVertical = true
-        collectionView.contentInset = UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100)
+        collectionView.alwaysBounceVertical = false
+        collectionView.showsHorizontalScrollIndicator = false
     }
     
     override func viewDidLoad() {
@@ -40,54 +66,54 @@ class TimelineCollectionViewController: UICollectionViewController {
         timelineCancellable = mediaComposer.$timeline.receive(on: DispatchQueue.main).sink { _ in
             self.collectionView.reloadData()
         }
+        playerCancellable = mediaComposer.$player.compactMap { $0 }.sink { [weak self] player in
+            self?.timeObserverToken = nil
+            self?.observePlayTime(player)
+            self?.playerCancellable?.cancel()
+            self?.playerStatusCancellable = player
+                .publisher(for: \.timeControlStatus)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveValue: { [weak self] playerStatus in
+                    guard let self, playerStatus == .playing, self.isDragging else { return }
+                    self.collectionView.setContentOffset(self.collectionView.contentOffset, animated: false)
+                })
+        }
+        
+        collectionView.contentInset = UIEdgeInsets(top: 100, left: collectionViewHorizontalInset, bottom: 100, right: collectionViewHorizontalInset)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         timelineCancellable?.cancel()
+        playerCancellable?.cancel()
+        playerStatusCancellable?.cancel()
     }
     
     private func setupSubviews() {
         view.addSubview(timeScaleView)
+        view.addSubview(timeIndicatorView)
         let timeScaleHeight: CGFloat = 20
         NSLayoutConstraint.activate([
             timeScaleView.topAnchor.constraint(equalTo: view.topAnchor),
             timeScaleView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             timeScaleView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            timeScaleView.heightAnchor.constraint(equalToConstant: timeScaleHeight)
+            timeScaleView.heightAnchor.constraint(equalToConstant: timeScaleHeight),
+            
+            timeIndicatorView.topAnchor.constraint(equalTo: timeScaleView.bottomAnchor),
+            timeIndicatorView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            timeIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            timeIndicatorView.widthAnchor.constraint(equalToConstant: 2)
         ])
     }
     
-    private func getTimeline(track: TimelineTrack, targetSize: CGSize, scale: CGFloat = 1) async -> UIImage? {
-        guard let asset = track.assetTrack.asset,
-              let (originalNaturalSize, preferredTransform) = try? await track.assetTrack.load(.naturalSize, .preferredTransform) else { return nil }
-        
-        let transformedNaturalSize = originalNaturalSize.applying(preferredTransform)
-        let naturalSize = CGSize(width: abs(transformedNaturalSize.width), height: (transformedNaturalSize.height))
-        let frameWidth = targetSize.height * (naturalSize.width / naturalSize.height)
-        let framesCount = Int((targetSize.width / frameWidth).rounded(.up))
-        
-        let frameGap = track.duration.seconds / Double(framesCount)
-        
-        var times = [CMTime]()
-        for frame in 0..<framesCount {
-            times.append(CMTime(seconds: frameGap * Double(frame), preferredTimescale: 100))
+    private func observePlayTime(_ player: AVPlayer?) {
+        let fps = 60.0
+        let time = CMTime(seconds: 1.0 / fps, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+
+        timeObserverToken = player?.addPeriodicTimeObserver(forInterval: time, queue: .main) { [weak self] time in
+            guard let self else { return }
+            self.collectionView.setContentOffset(CGPoint(x: -self.collectionViewHorizontalInset + CGFloat(time.seconds) * 100, y: -100), animated: false)
         }
-        
-        let generator = AVAssetImageGenerator(asset: asset)
-        generator.appliesPreferredTrackTransform = true
-        
-        UIGraphicsBeginImageContextWithOptions(targetSize, false, scale)
-        defer { UIGraphicsEndImageContext() }
-        
-        for await result in generator.images(for: times) {
-            if case let .success(requestedTime, cgImage, _) = result {
-                let index = Int((requestedTime.seconds / frameGap).rounded())
-                let uiImage = UIImage(cgImage: cgImage)
-                uiImage.draw(in: CGRect(x: frameWidth * CGFloat(index), y: 0, width: frameWidth, height: targetSize.height))
-            }
-        }
-        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     // MARK: UICollectionViewDataSource
@@ -98,22 +124,44 @@ class TimelineCollectionViewController: UICollectionViewController {
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueCell(at: indexPath, type: TimelineVideoCollectionViewCell.self)
-        if indexPath.row == 0 {
-            cell.imageView.backgroundColor = .blue
-        }
         Task {
-            let timelineImage = await getTimeline(track: mediaComposer.timeline.videos[indexPath.item],
-                                                  targetSize: CGSize(width: widthForItem(at: indexPath),
-                                                                     height: 60))
+            let timelineImage = await timelineImageProvider.getTimeline(track: mediaComposer.timeline.videos[indexPath.item],
+                                                                        indexPath: indexPath,
+                                                                        targetSize: CGSize(width: widthForItem(at: indexPath),
+                                                                                           height: 60))
             await MainActor.run {
                 cell.imageView.image = timelineImage
             }
         }
+        
         return cell
     }
     
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         timeScaleView.updateOffset(scrollView.contentOffset.x)
+        if isDragging {
+            let seconds = min(
+                max(CGFloat.zero, scrollView.contentOffset.x + collectionViewHorizontalInset) / 100,
+                mediaComposer.timeline.totalDuration.seconds
+            )
+            let targetTime = CMTime(seconds: Double(seconds), preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            let tolerance = CMTime(seconds: 0.05, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            mediaComposer.player?.seek(to: targetTime, toleranceBefore: tolerance, toleranceAfter: tolerance)
+        }
+    }
+    
+    override func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        isDragging = true
+    }
+    
+    override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        isDragging = false
+    }
+    
+    override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            isDragging = false
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -126,4 +174,3 @@ extension TimelineCollectionViewController: TimelineCollectionViewLayoutDelegate
         return CGFloat(mediaComposer.timeline.videos[indexPath.item].duration.seconds * 100)
     }
 }
-
