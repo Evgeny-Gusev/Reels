@@ -44,6 +44,13 @@ class TimelineViewController: UIViewController {
         return bottomBarContainerView
     }()
     
+    private lazy var bottomSafeAreaCamouflageView: UIView = {
+        let bottomSafeAreaCamouflageView = UIView()
+        bottomSafeAreaCamouflageView.translatesAutoresizingMaskIntoConstraints = false
+        bottomSafeAreaCamouflageView.backgroundColor = .background
+        return bottomSafeAreaCamouflageView
+    }()
+    
     private lazy var playbackBottomBarView: PlaybackBottomBarView = {
         let playbackBottomBarView = PlaybackBottomBarView()
         playbackBottomBarView.delegate = self
@@ -87,6 +94,7 @@ class TimelineViewController: UIViewController {
         view.addSubview(playbackView)
         view.addSubview(middleToolBarView)
         view.addSubview(bottomBarContainerView)
+        view.addSubview(bottomSafeAreaCamouflageView)
         
         let middleBarHeight: CGFloat = 40
         let totalHeight = availableScreenHeight
@@ -105,6 +113,11 @@ class TimelineViewController: UIViewController {
             bottomBarContainerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             bottomBarContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomBarContainerView.heightAnchor.constraint(equalToConstant: bottomBarHeight),
+            
+            bottomSafeAreaCamouflageView.topAnchor.constraint(equalTo: bottomBarContainerView.bottomAnchor),
+            bottomSafeAreaCamouflageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomSafeAreaCamouflageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            bottomSafeAreaCamouflageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             
             middleToolBarView.topAnchor.constraint(equalTo: playbackView.bottomAnchor),
             middleToolBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),

@@ -21,7 +21,6 @@ class TimelineVideoCollectionViewCell: UICollectionViewCell, ReusableItem {
     
     private func setup() {
         addSubview(imageView)
-        imageView.backgroundColor = .red
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: topAnchor),
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
