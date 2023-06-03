@@ -13,7 +13,6 @@ class PlaybackView: UIView {
     weak var delegate: PlaybackViewDelegate?
     
     private let mediaComposer: MediaComposer
-    private var playerCancellable: AnyCancellable?
     private let playerViewBoundsKeyPath = NSExpression(forKeyPath: \PlaybackView.playerView.bounds).keyPath
     
     @objc private lazy var playerView: UIView = {
@@ -42,17 +41,9 @@ class PlaybackView: UIView {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         setupSubviews()
-        
-        playerCancellable = mediaComposer
-            .$player
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newPlayer in
-                guard let newPlayer, let self else { return }
-                self.playerView.layer.removeSublayers()
-                let playerLayer = AVPlayerLayer(player: newPlayer)
-                self.playerView.layer.addSublayer(playerLayer)
-                playerLayer.frame = self.playerView.bounds
-            }
+        let playerLayer = AVPlayerLayer(player: mediaComposer.player)
+        playerView.layer.addSublayer(playerLayer)
+        playerLayer.frame = playerView.bounds
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(playerViewTapped))
         playerView.addGestureRecognizer(tapGestureRecognizer)

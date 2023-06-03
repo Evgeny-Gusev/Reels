@@ -17,9 +17,11 @@ class TimeScaleView: UIView {
     init(_ mediaComposer: MediaComposer) {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
-        timelineCancellable = mediaComposer.$timeline.receive(on: DispatchQueue.main).sink { [weak self] timeline in
-            self?.createTimeLayer(timeline.totalDuration.seconds)
-        }
+        timelineCancellable = mediaComposer.timeline.publisher(for: \.totalDuration)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] totalDuration in
+                self?.createTimeLayer(totalDuration.seconds)
+            })
     }
     
     func updateOffset(_ newOffset: CGFloat) {

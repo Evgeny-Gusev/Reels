@@ -12,7 +12,6 @@ import Combine
 class TimelineCollectionViewController: UICollectionViewController {
     private var mediaComposer: MediaComposer
     private var timelineCancellable: AnyCancellable?
-    private var playerCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
     private var timeObserverToken: Any?
     private let timelineImageProvider = TimelineImageProvider()
@@ -20,9 +19,9 @@ class TimelineCollectionViewController: UICollectionViewController {
         didSet {
             if isDragging == oldValue { return }
             if isDragging {
-                mediaComposer.player?.pause()
+                mediaComposer.player.pause()
                 if let timeObserverToken {
-                    mediaComposer.player?.removeTimeObserver(timeObserverToken)
+                    mediaComposer.player.removeTimeObserver(timeObserverToken)
                     self.timeObserverToken = nil
                 }
             } else {
@@ -63,21 +62,22 @@ class TimelineCollectionViewController: UICollectionViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        timelineCancellable = mediaComposer.$timeline.receive(on: DispatchQueue.main).sink { _ in
-            self.collectionView.reloadData()
-        }
-        playerCancellable = mediaComposer.$player.compactMap { $0 }.sink { [weak self] player in
-            self?.timeObserverToken = nil
-            self?.observePlayTime(player)
-            self?.playerCancellable?.cancel()
-            self?.playerStatusCancellable = player
-                .publisher(for: \.timeControlStatus)
-                .receive(on: DispatchQueue.main)
-                .sink(receiveValue: { [weak self] playerStatus in
-                    guard let self, playerStatus == .playing, self.isDragging else { return }
-                    self.collectionView.setContentOffset(self.collectionView.contentOffset, animated: false)
-                })
-        }
+        
+        timelineCancellable = mediaComposer.timeline.publisher(for: \.totalDuration)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] _ in
+                self?.collectionView.reloadData()
+            })
+        timeObserverToken = nil
+        observePlayTime(mediaComposer.player)
+        playerStatusCancellable?.cancel()
+        playerStatusCancellable = mediaComposer.player
+            .publisher(for: \.timeControlStatus)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] playerStatus in
+                guard let self, playerStatus == .playing, self.isDragging else { return }
+                self.collectionView.setContentOffset(self.collectionView.contentOffset, animated: false)
+            })
         
         collectionView.contentInset = UIEdgeInsets(top: 100, left: collectionViewHorizontalInset, bottom: 100, right: collectionViewHorizontalInset)
     }
@@ -85,7 +85,6 @@ class TimelineCollectionViewController: UICollectionViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         timelineCancellable?.cancel()
-        playerCancellable?.cancel()
         playerStatusCancellable?.cancel()
     }
     
@@ -146,7 +145,7 @@ class TimelineCollectionViewController: UICollectionViewController {
             )
             let targetTime = CMTime(seconds: Double(seconds), preferredTimescale: CMTimeScale(NSEC_PER_SEC))
             let tolerance = CMTime(seconds: 0.05, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-            mediaComposer.player?.seek(to: targetTime, toleranceBefore: tolerance, toleranceAfter: tolerance)
+            mediaComposer.player.seek(to: targetTime, toleranceBefore: tolerance, toleranceAfter: tolerance)
         }
     }
     
@@ -171,6 +170,6 @@ class TimelineCollectionViewController: UICollectionViewController {
 
 extension TimelineCollectionViewController: TimelineCollectionViewLayoutDelegate {
     func widthForItem(at indexPath: IndexPath) -> CGFloat {
-        return CGFloat(mediaComposer.timeline.videos[indexPath.item].duration.seconds * 100)
+        return CGFloat(mediaComposer.timeline.videos[indexPath.item].timeRange.duration.seconds * 100)
     }
 }

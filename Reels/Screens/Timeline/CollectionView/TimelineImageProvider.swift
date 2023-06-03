@@ -34,7 +34,7 @@ actor TimelineImageProvider {
             let naturalSize = CGSize(width: abs(transformedNaturalSize.width), height: (transformedNaturalSize.height))
             let frameWidth = targetSize.height * (naturalSize.width / naturalSize.height)
             let framesCount = Int((targetSize.width / frameWidth).rounded(.up))
-            let frameGap = track.duration.seconds / Double(framesCount)
+            let frameGap = track.timeRange.duration.seconds / Double(framesCount)
             
             var times = [CMTime]()
             for frame in 0..<framesCount {

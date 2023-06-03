@@ -20,7 +20,6 @@ class MiddleToolBarView: UIView {
     private let pauseImage = UIImage(systemName: "pause.fill")?
         .resize(to: MiddleToolBarView.buttonImageSize)
         .withRenderingMode(.alwaysTemplate)
-    private var playerCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
     private var timeObserverToken: Any?
     
@@ -64,19 +63,14 @@ class MiddleToolBarView: UIView {
         self.mediaComposer = mediaComposer
         setupSubviews()
         
-        playerCancellable = mediaComposer.$player
-            .compactMap { $0 }
-            .sink { [weak self] player in
-                self?.addPeriodicTimeObserver(for: player)
-                self?.playerStatusCancellable?.cancel()
-                self?.playerStatusCancellable = player
-                    .publisher(for: \.timeControlStatus)
-                    .receive(on: DispatchQueue.main)
-                    .sink(receiveValue: { [weak self] playerStatus in
-                        let image = playerStatus == .playing ? self?.pauseImage : self?.playImage
-                        self?.toggleButton.setImage(image, for: .normal)
-                    })
-            }
+        addPeriodicTimeObserver(for: mediaComposer.player)
+        playerStatusCancellable = mediaComposer.player
+            .publisher(for: \.timeControlStatus)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] playerStatus in
+                let image = playerStatus == .playing ? self?.pauseImage : self?.playImage
+                self?.toggleButton.setImage(image, for: .normal)
+            })
     }
     
     private func setupSubviews() {

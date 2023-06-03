@@ -41,7 +41,6 @@ class PlaybackToggleView: UIView {
     private let playingImage = UIImage(systemName: "play.fill")
     private let pausedImage = UIImage(systemName: "pause.fill")
     private let imageView: UIImageView
-    private var playerCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
     private var currentImage: UIImage? {
         return state == .paused ? pausedImage : playingImage
@@ -51,6 +50,7 @@ class PlaybackToggleView: UIView {
         self.imageView = UIImageView()
         super.init(frame: CGRect(x: 0, y: 0, width: size, height: size))
         
+        setPlayer(mediaComposer.player)
         imageView.image = currentImage
         imageView.tintColor = .white
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -66,13 +66,6 @@ class PlaybackToggleView: UIView {
             imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
-        
-        playerCancellable = mediaComposer
-            .$player
-            .sink { [weak self] newPlayer in
-                guard let newPlayer else { return }
-                self?.setPlayer(newPlayer)
-            }
     }
     
     private func setPlayer(_ player: AVPlayer) {

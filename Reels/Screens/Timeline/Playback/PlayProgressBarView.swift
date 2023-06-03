@@ -34,7 +34,6 @@ class PlayProgressBarView: UIView {
     private var heightConstraint: NSLayoutConstraint!
     private var playerDurationCancellable: AnyCancellable?
     private var playerStatusCancellable: AnyCancellable?
-    private var playerCancellable: AnyCancellable?
     private var player: AVPlayer?
     private var timeObserverToken: Any?
     private let timelineHeight: CGFloat = 4
@@ -93,13 +92,7 @@ class PlayProgressBarView: UIView {
         translatesAutoresizingMaskIntoConstraints = false
         setupSubviews()
         addObserver(self, forKeyPath: timelineBackgroundBoundsKeyPath, options: .new, context: nil)
-        playerCancellable = mediaComposer
-            .$player
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newPlayer in
-                guard let newPlayer else { return }
-                self?.setPlayer(newPlayer)
-            }
+        setPlayer(mediaComposer.player)
     }
     
     private func setPlayer(_ player: AVPlayer) {
