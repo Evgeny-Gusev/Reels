@@ -136,6 +136,22 @@ class TimelineCollectionViewController: UICollectionViewController {
         return cell
     }
     
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("selected")
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        guard let cell = collectionView.cellForItem(at: indexPath) else {
+            return false
+        }
+        if cell.isSelected {
+            collectionView.deselectItem(at: indexPath, animated: false)
+            return false
+        } else {
+            return true
+        }
+    }
+    
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         timeScaleView.updateOffset(scrollView.contentOffset.x)
         if isDragging {
@@ -170,6 +186,10 @@ class TimelineCollectionViewController: UICollectionViewController {
 
 extension TimelineCollectionViewController: TimelineCollectionViewLayoutDelegate {
     func widthForItem(at indexPath: IndexPath) -> CGFloat {
-        return CGFloat(mediaComposer.timeline.videos[indexPath.item].timeRange.duration.seconds * 100)
+        var extra: CGFloat = 0
+        if let cell = collectionView.cellForItem(at: indexPath) as? TimelineVideoCollectionViewCell, cell.isSelected {
+            extra = 30
+        }
+        return CGFloat(mediaComposer.timeline.videos[indexPath.item].timeRange.duration.seconds * 100) + extra
     }
 }
